@@ -61,20 +61,7 @@ end
 
 
 function manager_gui.on_player_created(e)
-	local player = game.get_player(e.player_index)
-	if not player then return end
-	local player_data = {
-		search_network_mask = -1,
-		trains_orderings = {},
-		trains_orderings_invert = {},
-		pinning = false,
-		refs = manager.create(player),
-		selected_tab = "stations_tab",
-	}
-	global.manager.players[e.player_index] = player_data
-
-	--manager.update(global, player, player_data)
-	--top_left_button_update(player, player_data)
+	init_player(e.player_index)
 end
 
 function manager_gui.on_player_removed(e)
@@ -146,7 +133,33 @@ local function init_items(manager)
 end
 
 
+local function init_player(player_index)
+	local player = game.get_player(player_index)
+	if not player then return end
+	local player_data = {
+		search_network_mask = -1,
+		trains_orderings = {},
+		trains_orderings_invert = {},
+		pinning = false,
+		refs = manager.create(player),
+		selected_tab = "stations_tab",
+	}
+	global.manager.players[player_index] = player_data
+
+	--manager.update(global, player, player_data)
+	--top_left_button_update(player, player_data)
+end
+
+
 function manager_gui.on_migration()
+	if not global.manager then
+		global.manager = {
+			players = {},
+		}
+		for i in pairs(game.players) do
+			init_player(i)
+		end
+	end
 	for i, v in pairs(global.manager.players) do
 		manager_gui.reset_player(i, v)
 	end
